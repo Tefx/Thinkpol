@@ -1,7 +1,7 @@
 from gevent import socket
 from gevent import pool
 from port import Port
-import yajl as json
+import json
 import gevent
 
 
@@ -30,14 +30,22 @@ class Miniture(object):
 			uuid = port.read()
 			self.telescreens[uuid] = port
 
+	def pingall(self, uuid):
+		if uuid not in self.telescreens:
+			return
+		port = self.telescreens[uuid]
+		port.write("S")
+		if not port.read():
+			del self.telescreens[uuid]
+
 	def fetch_state(self, uuid):
 		if uuid not in self.telescreens:
 			return (uuid, None)
 		port = self.telescreens[uuid]
 		port.write("S")
-		res = json.loads(port.read())
+		res = port.read()
 		if res:
-			return (uuid, res)
+			return (uuid, json.loads(res))
 		else:
 			del self.telescreens[uuid]
 			return (uuid, None)
@@ -48,6 +56,7 @@ class Miniture(object):
 			if not req:
 				break
 			if req == "?":
+				self.ggroup.map(self.pingall, self.telescreens.iterkeys())
 				port.write(json.dumps(self.telescreens.keys()))
 				continue
 			if req == "*":
@@ -55,7 +64,7 @@ class Miniture(object):
 			else:
 				want_list = json.loads(req)
 			rep = self.ggroup.map(self.fetch_state, want_list)
-			port.write(json.dumps({k:v for k,v in rep}))
+			port.write(json.dumps({k:v for k,v in rep if v}))
 
 	def run(self, ts_port, tp_port):
 		gevent.joinall([

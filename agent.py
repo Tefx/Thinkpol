@@ -1,4 +1,4 @@
-import yajl as json
+import json
 import socket
 from port import Port
 
@@ -24,5 +24,4 @@ if __name__ == '__main__':
 	Smith = Agent(("localhost", 10001))
 	print Smith.list()
 	print Smith.fetch()
-	print Smith.fetch(["T_7d102f02fbda11e1b476109add559973"])
-		
+	print Smith.fetch(["Worker_13d7141efc1a11e1a1e8109add559973"])
