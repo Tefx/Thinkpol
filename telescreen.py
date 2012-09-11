@@ -1,36 +1,38 @@
 import gevent
-from gevent.queue import Queue
 from gevent import socket
 from uuid import uuid1
 from port import Port
 import yajl as json
-import sys
-
-LISTEN_PORT = 9999
 
 class Telescreen(object):
 	def __init__(self):
-		self.__dict__["cq"] = Queue()
-		self.__dict__["observer"] = gevent.spawn(self.observe)
-		self.__dict__["state"] = {}
-		self.uuid = uuid1().hex
+		self.__dict__["_state"] = {}
+		self.__dict__["_uuid"] = "%s_%s" % (self.__class__.__name__, uuid1().hex)
 
 	def __setattr__(self, attr, val):
-		 self.state[attr] = val
+		if not attr.startswith("_"):
+			self._state[attr] = val
 
-	def observe(self):
+	def _connect(self, addr):
 		listen_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		listen_sock.bind(("", LISTEN_PORT))
-		listen_sock.listen(20)
+		listen_sock.connect(addr)
+		self.__dict__["_port"] = Port(listen_sock)
+		self.__dict__["_observer"] = gevent.spawn(self._observe)
+
+	def _observe(self):
+		self._port.write(self._uuid)
 		while True:
-			sock, _ = listen_sock.accept()
-			port = Port(sock)
-			port.write(json.dumps(self.state))
-			port.close()
+			msg = self._port.read()
+			if not msg: 
+				break
+			if not self._port.write(json.dumps(self._state)):
+				break
 
-	def keep_alive(self):
-		self.observer.join()
+	def _keep_alive(self):
+		self._observer.join()
 
+	def __repr__(self):
+		return self.__class__.__name__ + str(self._uuid)
 
 if __name__ == '__main__':
 	class T(Telescreen):
@@ -40,9 +42,11 @@ if __name__ == '__main__':
 			self.v2 = 2
 
 	t = T()
+	t._connect(("localhost", 10000))
 	t.a = 1
 	t.a = 1
 	t.a = 2
 	gevent.sleep(20)
 	t.a = 6
-	t.keep_alive()
+	t._a = 7
+	t._keep_alive()
