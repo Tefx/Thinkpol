@@ -23,5 +23,4 @@ class Agent(object):
 if __name__ == '__main__':
 	Smith = Agent(("localhost", 10001))
 	print Smith.list()
-	print Smith.fetch()
-	print Smith.fetch(["Worker_13d7141efc1a11e1a1e8109add559973"])
+	print Smith.fetch(["Worker_8056ddbafca911e1a1f2109add559973"])

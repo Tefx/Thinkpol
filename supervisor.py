@@ -7,14 +7,15 @@ import signal
 class Worker(Telescreen):
 	def __init__(self, cmd):
 		super(Worker, self).__init__()
-		self._p = psutil.Popen(cmd, shell=False, stdout=PIPE)
 		self._keeplet = gevent.spawn(self.keep_alive)
+		self.cmd = cmd
 
 	def keep_alive(self):
+		self._p = psutil.Popen(self.cmd, shell=False, stdout=PIPE)
 		self._running = True
 		while self._running:
 			if not self._p.is_running():
-				self._p = psutil.Popen(cmd, shell=False, stdout=PIPE)
+				self._p = psutil.Popen(self.cmd, shell=False, stdout=PIPE)
 			gevent.sleep(5)
 
 	def stop(self):
@@ -35,6 +36,7 @@ class Worker(Telescreen):
 
 class Node(Telescreen):
 	def start(self, cmd, num):
+		print num
 		self.workers = [Worker(cmd) for i in xrange(num)]
 		self.cpu_num = psutil.NUM_CPUS
 		self.vmem_total = psutil.total_virtmem()
@@ -69,5 +71,4 @@ if __name__ == '__main__':
 	gevent.signal(signal.SIGQUIT, sv.stop)
 	gevent.signal(signal.SIGINT, sv.stop)
 
-	gevent.sleep(10)
-	gevent.stop()
+	gevent.sleep(100)
