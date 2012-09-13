@@ -1,4 +1,5 @@
 import struct
+import snappy
 
 def safe_recv(sock, len):
     try:
@@ -35,10 +36,10 @@ class Port(object):
             if not recv: return False
             chunks.append(recv)
             length -= len(recv)
-        return "".join(chunks)
+        return snappy.decompress("".join(chunks))
 
     def write(self, bytes):
-        msg = struct.pack(self.HEADER_STRUCT, len(bytes)) + bytes
+        msg = struct.pack(self.HEADER_STRUCT, len(bytes)) + snappy.compress(bytes)
         return safe_send(self._sock, msg)
 
     def close(self):
