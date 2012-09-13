@@ -39,7 +39,8 @@ class Port(object):
         return snappy.decompress("".join(chunks))
 
     def write(self, bytes):
-        msg = struct.pack(self.HEADER_STRUCT, len(bytes)) + snappy.compress(bytes)
+        bytes = snappy.compress(bytes)
+        msg = struct.pack(self.HEADER_STRUCT, len(bytes)) + bytes
         return safe_send(self._sock, msg)
 
     def close(self):
