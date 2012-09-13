@@ -50,15 +50,12 @@ class Node(Telescreen):
 
 	def collect_vm_info(self):
 		vm_info = psutil.virtual_memory()
-		print vm_info
 		self.vm_total = vm_info.total
 		self.vm_available = vm_info.available
 		self.vm_percent = vm_info.percent
 		self.vm_used = vm_info.used
-		self.vm_free = vm_info.free
 		self.vm_active = vm_info.active
 		self.vm_inactive = vm_info.inactive
-		self.vm_buffers = vm_info.buffers
 		self.vm_cached = vm_info.cached
 
 	def collect_cpu_info(self):
