@@ -64,6 +64,7 @@ class Miniture(object):
 			else:
 				want_list = json.loads(req)
 			rep = self.ggroup.map(self.fetch_state, want_list)
+			print rep
 			port.write(json.dumps({k:v for k,v in rep if v}))
 
 	def run(self, ts_port, tp_port):
