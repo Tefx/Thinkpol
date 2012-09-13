@@ -30,15 +30,13 @@ class Worker(Telescreen):
 		return {'cpu_percent'		:	round(self._p.get_cpu_percent(), 2),
 				'memory_percent'	:	round(self._p.get_memory_percent(), 2),
 				'status'			:	str(self._p.status),
-				'memory_info'		:	self._p.get_memory_info(),
-				'cpu_times'			:	self._p.get_cpu_times()}
+				'memory_info'		:	self._p.get_memory_info()}
 
 
 class Node(Telescreen):
 	def start(self, cmd, num):
 		self._workers = [Worker(cmd) for i in xrange(num)]
 		self.num_cpus = psutil.NUM_CPUS
-		self.boot_time = psutil.BOOT_TIME
 
 	def stop(self):
 		for worker in self._workers:
@@ -50,13 +48,29 @@ class Node(Telescreen):
 			for worker in self._workers:
 				worker._connect(addr)
 
-	def fetch_trigger(self):
-		self.worker_info = {str(w):w.info() for w in self._workers}
+	def collect_vm_info(self):
+		vm_info = psutil.virtual_memory()
+		self.total = vm_info.total
+		self.available = vm_info.available
+		self.percent = vm_info.percent
+		self.used = vm_info.used
+		self.free = vm_info.free
+		self.active = vm_info.active
+		self.inactive = vm_info.inactive
+		self.buffers = vm_info.buffers
+		self.cached = vm_info.cached
+
+	def collect_cpu_info(self):
 		cpu_times = psutil.cpu_times()
 		self.user_time = cpu_times.user
 		self.sys_time = cpu_times.system
 		self.idle_time = cpu_times.idle
+		self.cpu_percent = psutil.cpu_percent()
 
+	def fetch_trigger(self):
+		self.worker_info = {str(w):w.info() for w in self._workers}
+		self.collect_cpu_info()
+		self.collect_vm_info()
 
 if __name__ == '__main__':
 	sv = Node()
