@@ -27,19 +27,18 @@ class Worker(Telescreen):
 			self._p.kill()
 
 	def info(self):
-		return {'cp'	:	self._p.get_cpu_percent(),
-				'mp'	:	self._p.get_memory_percent(),
-				'sta'	:	str(self._p.status),
-				'ut'	:	self._p.get_cpu_times().user,
-				'st'	:	self._p.get_cpu_times().system}
+		return {'cpu_percent'		:	round(self._p.get_cpu_percent(), 2),
+				'memory_percent'	:	round(self._p.get_memory_percent(), 2),
+				'status'			:	str(self._p.status),
+				'get_memory_info'	:	self._p.get_memory_info(),
+				'cpu_times'			:	self._p.get_cpu_times()}
 
 
 class Node(Telescreen):
 	def start(self, cmd, num):
-		print num
 		self._workers = [Worker(cmd) for i in xrange(num)]
-		self.cn = psutil.NUM_CPUS
-		self.bt = psutil.BOOT_TIME
+		self.num_cpus = psutil.NUM_CPUS
+		self.boot_time = psutil.BOOT_TIME
 
 	def stop(self):
 		for worker in self._workers:
@@ -52,7 +51,7 @@ class Node(Telescreen):
 				worker._connect(addr)
 
 	def fetch_trigger(self):
-		self.wi = {str(w):w.info() for w in self._workers}
+		self.worker_info = {str(w):w.info() for w in self._workers}
 
 
 if __name__ == '__main__':
