@@ -7,7 +7,7 @@ import json
 class Telescreen(object):
 	def __init__(self):
 		self.__dict__["_state"] = {}
-		self.__dict__["_uuid"] = "%s_%s" % (self.__class__.__name__, uuid1().hex)
+		self.__dict__["_uuid"] = "%s_%s" % (self.__class__.__name__, (uuid1().hex)[:8])
 
 	def __setattr__(self, attr, val):
 		self.__dict__[attr] = val
