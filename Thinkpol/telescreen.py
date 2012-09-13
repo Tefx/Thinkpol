@@ -2,7 +2,7 @@ import gevent
 from gevent import socket
 from uuid import uuid1
 from port import Port
-import json
+import yajl as json
 
 class Telescreen(object):
 	def __init__(self):
@@ -30,7 +30,7 @@ class Telescreen(object):
 				self._port.write("P")
 			else:
 				self.fetch_trigger()
-				if not self._port.write(json.dumps(self._state, default=repr)):
+				if not self._port.write(json.dumps(self._state)):
 					break
 
 	def fetch_trigger(self):

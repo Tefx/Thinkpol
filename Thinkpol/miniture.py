@@ -1,7 +1,7 @@
 from gevent import socket
 from gevent import pool
 from port import Port
-import json
+import yajl as json
 import gevent
 
 

@@ -1,4 +1,4 @@
-import json
+import yajl as json
 import socket
 from port import Port
 
