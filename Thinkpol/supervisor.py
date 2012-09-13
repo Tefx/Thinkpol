@@ -26,40 +26,35 @@ class Worker(Telescreen):
 		except TimeoutExpired:
 			self._p.kill()
 
-	def fetch_trigger(self):
-		self.cpu_percent = self._p.get_cpu_percent()
-		self.memory_percent = self._p.get_memory_percent()
-		self.status = str(self._p.status)
-		self.usertimes = self._p.get_cpu_times().user
-		self.systimes = self._p.get_cpu_times().system
+	def info(self):
+		return {'cpu_percent'	:	self._p.get_cpu_percent(),
+				'memory_percent':	self._p.get_memory_percent(),
+				'status'		:	str(self._p.status),
+				'usertimes'		:	self._p.get_cpu_times().user,
+				'systimes'		:	self._p.get_cpu_times().system}
 
 
 class Node(Telescreen):
 	def start(self, cmd, num):
 		print num
-		self.workers = [Worker(cmd) for i in xrange(num)]
+		self._workers = [Worker(cmd) for i in xrange(num)]
 		self.cpu_num = psutil.NUM_CPUS
-		self.vmem_total = psutil.total_virtmem()
 		self.boot_time = psutil.BOOT_TIME
 		self.pmem_total = psutil.TOTAL_PHYMEM
 
 	def stop(self):
-		for worker in self.workers:
+		for worker in self._workers:
 			worker.stop()
 
-	def connect(self, addr):
+	def connect(self, addr, conn_workers=False):
 		self._connect(addr)
-		for worker in self.workers:
-			worker._connect(addr)
+		if conn_workers:
+			for worker in self._workers:
+				worker._connect(addr)
 
 	def fetch_trigger(self):
-		self.vmem_usage = psutil.virtmem_usage()
-		self.vmem_avail = psutil.avail_virtmem()
-		self.vmem_used = psutil.used_virtmem()
-
-		self.pmem_usage = psutil.phymem_usage()
-		self.pmem_avail = psutil.avail_phymem()
 		self.pmem_used = psutil.used_phymem()
+		self.worker_info = {str(w):w.info() for w in self._workers}
 
 
 if __name__ == '__main__':
