@@ -30,7 +30,7 @@ class Worker(Telescreen):
 		return {'cpu_percent'		:	round(self._p.get_cpu_percent(), 2),
 				'memory_percent'	:	round(self._p.get_memory_percent(), 2),
 				'status'			:	str(self._p.status),
-				'memory_info'	:	self._p.get_memory_info(),
+				'memory_info'		:	self._p.get_memory_info(),
 				'cpu_times'			:	self._p.get_cpu_times()}
 
 
@@ -52,7 +52,10 @@ class Node(Telescreen):
 
 	def fetch_trigger(self):
 		self.worker_info = {str(w):w.info() for w in self._workers}
-		self.cpu_times = psutil.cpu_times()
+		cpu_times = psutil.cpu_times()
+		self.user_time = cpu_times.user
+		self.sys_time = cpu_times.system
+		self.idle_time = cpu_times.idle
 
 
 if __name__ == '__main__':
