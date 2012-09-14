@@ -3,6 +3,7 @@ from subprocess import PIPE
 from telescreen import Telescreen
 import gevent
 import signal
+from gevent import socket
 
 class Worker(Telescreen):
 	def __init__(self, cmd):
@@ -14,6 +15,8 @@ class Worker(Telescreen):
 		self._p = psutil.Popen(self.cmd, shell=False, stdout=PIPE)
 		self._running = True
 		while self._running:
+			if str(self._p.status) == "zombie":
+				self.stop()
 			if not self._p.is_running():
 				self._p = psutil.Popen(self.cmd, shell=False, stdout=PIPE)
 			gevent.sleep(5)
@@ -67,6 +70,7 @@ class Node(Telescreen):
 
 	def fetch_trigger(self):
 		self.worker_info = {str(w):w.info() for w in self._workers}
+		self.ip = socket.gethostbyname(socket.gethostname())
 		self.collect_cpu_info()
 		self.collect_vm_info()
 
