@@ -16,7 +16,7 @@ class Worker(Telescreen):
 		self._running = True
 		while self._running:
 			if str(self._p.status) == "zombie":
-				self.stop()
+				self._p = psutil.Popen(self.cmd, shell=False, stdout=PIPE)
 			if not self._p.is_running():
 				self._p = psutil.Popen(self.cmd, shell=False, stdout=PIPE)
 			gevent.sleep(5)
