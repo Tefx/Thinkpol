@@ -21,5 +21,6 @@ class Agent(object):
 		return json.loads(self.port.read())
 
 if __name__ == '__main__':
-	Smith = Agent(("210.72.68.189", 10001))
-	print Smith.fetch(["Node_32d7490cfcc511e1b81afa163e22777e"])
+	Smith = Agent(("localhost", 10001))
+	print Smith.list()
+	print Smith.fetch()
