@@ -1,3 +1,4 @@
+from gevent.monkey import patch_all; patch_all()
 import gevent
 from gevent import socket
 from uuid import uuid1
@@ -19,8 +20,8 @@ class Telescreen(object):
 	def _connect(self, addr):
 		listen_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		listen_sock.connect(addr)
-		self.__dict__["_port"] = Port(listen_sock)
-		self.__dict__["_observer"] = gevent.spawn(self._observe)
+		self._port = Port(listen_sock)
+		self._observer = gevent.spawn(self._observe)
 
 	def _observe(self):
 		self._port.write(self._uuid)
@@ -38,7 +39,8 @@ class Telescreen(object):
 	def fetch_trigger(self):
 		pass
 
-	def _keep_alive(self):
+	def _close_connection(self):
+		self._port.close()
 		self._observer.join()
 
 	def __repr__(self):

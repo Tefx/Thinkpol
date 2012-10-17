@@ -1,5 +1,5 @@
 import struct
-import snappy
+from gevent.socket import SHUT_RDWR
 
 def safe_recv(sock, len):
     try:
@@ -36,12 +36,12 @@ class Port(object):
             if not recv: return False
             chunks.append(recv)
             length -= len(recv)
-        return snappy.decompress("".join(chunks))
+        return "".join(chunks)
 
     def write(self, bytes):
-        bytes = snappy.compress(bytes)
         msg = struct.pack(self.HEADER_STRUCT, len(bytes)) + bytes
         return safe_send(self._sock, msg)
 
     def close(self):
+        self._sock.shutdown(SHUT_RDWR)
         self._sock.close()
