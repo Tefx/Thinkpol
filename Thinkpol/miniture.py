@@ -1,7 +1,6 @@
 from gevent import socket
 from gevent import pool
-from port import Port
-import yajl as json
+from port import ObjPort
 import gevent
 
 
@@ -17,7 +16,7 @@ class Miniture(object):
 		sock.listen(10000)
 		while True:
 			client_sock, _ = sock.accept()
-			self.collect(Port(client_sock))
+			self.collect(ObjPort(client_sock))
 
 	def listen_telescreens(self, listen_port):
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,7 +25,7 @@ class Miniture(object):
 		sock.listen(10000)
 		while True:
 			client_sock, _ = sock.accept()
-			port = Port(client_sock)
+			port = ObjPort(client_sock)
 			uuid = port.read()
 			self.telescreens[uuid] = port
 
@@ -45,7 +44,7 @@ class Miniture(object):
 		port.write("S")
 		res = port.read()
 		if res:
-			return (uuid, json.loads(res))
+			return (uuid, res)
 		else:
 			del self.telescreens[uuid]
 			return (uuid, None)
@@ -57,14 +56,14 @@ class Miniture(object):
 				break
 			if req == "?":
 				self.ggroup.map(self.pingall, self.telescreens.iterkeys())
-				port.write(json.dumps(self.telescreens.keys()))
+				port.write(self.telescreens.keys())
 				continue
 			if req == "*":
 				want_list = self.telescreens.iterkeys()
 			else:
-				want_list = json.loads(req)
+				want_list = req
 			rep = self.ggroup.map(self.fetch_state, want_list)
-			port.write(json.dumps({k:v for k,v in rep if v}))
+			port.write({k:v for k,v in rep if v})
 
 	def run(self, ts_port, tp_port):
 		gevent.joinall([
