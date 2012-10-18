@@ -2,7 +2,7 @@ from gevent.monkey import patch_all; patch_all()
 import gevent
 from gevent import socket
 from uuid import uuid1
-from port import ObjPort
+from Corellia import ObjPort
 
 class Telescreen(object):
 	monitoring = []

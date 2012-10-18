@@ -1,5 +1,5 @@
 import socket
-from port import ObjPort
+from Corellia import ObjPort
 
 class Agent(object):
 	def __init__(self, addr):

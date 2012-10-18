@@ -1,6 +1,6 @@
 from gevent import socket
 from gevent import pool
-from port import ObjPort
+from Corellia import ObjPort
 import gevent
 
 
