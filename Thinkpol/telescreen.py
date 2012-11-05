@@ -10,6 +10,8 @@ class Telescreen(object):
 	def __init__(self):
 		self._state = {}
 		self._uuid = "%s_%s" % (self.__class__.__name__, (uuid1().hex)[:8])
+		for name in self.monitoring:
+			setattr(self, name, None)
 
 	def _connect(self, addr):
 		listen_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -27,11 +29,12 @@ class Telescreen(object):
 				self._port.write("P")
 			else:
 				self.fetch_trigger()
+				self._state = {k:getattr(self, k) for k in self.monitoring}
 				if not self._port.write(self._state):
 					break
 
 	def fetch_trigger(self):
-		self._state = {k:getattr(self, k) for k in self.monitoring}
+		pass
 
 	def _close_connection(self):
 		self._port.close()

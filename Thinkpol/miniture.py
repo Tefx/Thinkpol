@@ -61,7 +61,7 @@ class Miniture(object):
 			if req == "*":
 				want_list = self.telescreens.iterkeys()
 			else:
-				want_list = req
+				want_list = [x for x in self.telescreens.iterkeys() if req in x]
 			rep = self.ggroup.map(self.fetch_state, want_list)
 			port.write({k:v for k,v in rep if v})
 
